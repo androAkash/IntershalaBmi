@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "485677247704",
+    "project_id": "team-remote-opc",
+    "storage_bucket": "team-remote-opc.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:485677247704:android:a3b041f1e2b3fc5f407bad",
+        "android_client_info": {
+          "package_name": "com.example.teamremoteopc"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "485677247704-28bjirf9dft3ltn286a4794j9crud8gp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAUee-AEF_dBYvGkm8lUANXSOwIUtMTzjo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "485677247704-28bjirf9dft3ltn286a4794j9crud8gp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
