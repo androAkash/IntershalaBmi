@@ -14,7 +14,8 @@
         android:background="@color/white">
 
         <TextView
-            android:text="BMI Calculator"
+            android:id="@+id/username"
+            android:text="Hello Akash"
             android:textSize="20sp"
             android:textStyle="normal"
             android:gravity="center"

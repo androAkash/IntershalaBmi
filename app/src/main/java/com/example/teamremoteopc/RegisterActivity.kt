@@ -6,6 +6,8 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.TextUtils
+import android.view.View
+import android.widget.DatePicker
 import android.widget.Toast
 import com.example.teamremoteopc.databinding.ActivityRegisterBinding
 import com.google.firebase.auth.FirebaseAuth
@@ -21,16 +23,8 @@ class RegisterActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityRegisterBinding.inflate(layoutInflater)
 
-        val myCalender = Calendar.getInstance()
-        val datePicker = DatePickerDialog.OnDateSetListener { view, year, month, dayOfMonth ->
-            myCalender.set(Calendar.YEAR,year)
-            myCalender.set(Calendar.MONTH,month)
-            myCalender.set(Calendar.DAY_OF_MONTH,dayOfMonth)
-            updateLabel(myCalender)
-        }
-
         binding.btnDob.setOnClickListener {
-            DatePickerDialog(this,datePicker,myCalender.get(Calendar.YEAR),myCalender.get(Calendar.MONTH),myCalender.get(Calendar.DAY_OF_MONTH)).show()
+            selectDate()
         }
 
         binding.signupButton.setOnClickListener{
@@ -111,9 +105,35 @@ class RegisterActivity : AppCompatActivity() {
             }
     }
 
-    private fun updateLabel(myCalender : Calendar){
-        val myFormat = "dd-MM-yyyy"
-        val sdf = SimpleDateFormat(myFormat, Locale.UK)
-        binding.tvDob.text = sdf.format(myCalender.time)
+    fun selectDate(){
+        val c = Calendar.getInstance()
+        var cDay = c.get(Calendar.DAY_OF_MONTH)
+        var cMonth = c.get(Calendar.MONTH)
+        var cYear = c.get(Calendar.YEAR)
+
+        //set calender Dialog
+        val calendarDialog = DatePickerDialog(this,DatePickerDialog.OnDateSetListener{
+                view,year,month,dayOfMonth ->
+            cDay = dayOfMonth
+            cMonth = month
+            cYear = year
+            binding.btnDobCalculator.visibility = View.VISIBLE
+            textMessage("You select Date: $cDay/{$cMonth+1}/$cYear")
+            binding.btnDobCalculator.setOnClickListener {
+                val currentYear = Calendar.getInstance()
+                    .get(Calendar.YEAR)
+                val age = currentYear - cYear
+                binding.tvDob.visibility = View.VISIBLE
+                binding.tvDob.text = "Your Age is $age year"
+                textMessage( "Your Age is $age year")
+            }
+            binding.btnDob.text = "$cDay/{$cMonth+1}/$cYear"
+
+        },cYear,cMonth,cDay)
+        calendarDialog.show()
+    }
+
+    private fun textMessage(s: String) {
+        Toast.makeText(this, "$s", Toast.LENGTH_SHORT).show()
     }
 }
