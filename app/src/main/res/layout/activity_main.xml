@@ -31,7 +31,7 @@
         android:orientation="vertical"
         android:layout_margin="16dp"
         android:layout_below="@id/mainActivityAppbarLayout"
-        android:layout_above="@id/mainActivityButton"
+        android:layout_above="@id/mainActivityCalculateButton"
         android:weightSum="3">
 
         <LinearLayout
@@ -293,7 +293,7 @@
 
 
     <android.widget.Button
-        android:id="@+id/mainActivityButton"
+        android:id="@+id/mainActivityCalculateButton"
         android:text="Calculate Bmi"
         android:textColor="@color/lavender"
         android:background="@drawable/lavender_border"
