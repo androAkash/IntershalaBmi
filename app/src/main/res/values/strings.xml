@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Team Remote OPC</string>
+    <string name="todo" />
 </resources>
