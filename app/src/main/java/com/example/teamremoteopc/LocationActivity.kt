@@ -11,9 +11,13 @@ import android.location.LocationManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.Manifest
+import android.net.Uri
 import android.provider.Settings
+import android.view.View
 import android.widget.Toast
+import androidx.constraintlayout.motion.widget.Debug.getLocation
 import androidx.core.app.ActivityCompat
+import androidx.core.location.LocationManagerCompat.getCurrentLocation
 import com.example.teamremoteopc.databinding.ActivityLocationBinding
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -21,84 +25,80 @@ import java.util.*
 
 class LocationActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLocationBinding
-    private lateinit var mFusedLocationClient: FusedLocationProviderClient
-    private val permissionId = 2
+
+    private val LOCATION_PERMISSION_REQ_CODE = 1000;
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private var latitude: Double = 0.0
+    private var longitude: Double = 0.0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityLocationBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
-        binding.btnLocation.setOnClickListener {
-            getLocation()
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        binding.btGetLocation.setOnClickListener {
+            getCurrentLocation()
+        }
+        binding.btOpenMap.setOnClickListener {
+            openMap()
         }
     }
 
-    private fun isLocationEnabled(): Boolean {
-        val locationManager: LocationManager =
-            getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(
-            LocationManager.NETWORK_PROVIDER
-        )
-    }
-    private fun checkPermissions(): Boolean {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
-            &&
-            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-        ) {
-            return true
-        }
-        return false
-    }
-    private fun requestPermissions() {
-        ActivityCompat.requestPermissions(
-            this,
-            arrayOf(
-                Manifest.permission.ACCESS_COARSE_LOCATION,
+    private fun getCurrentLocation() {
+        // checking location permission
+        if (ActivityCompat.checkSelfPermission(
+                this,
                 Manifest.permission.ACCESS_FINE_LOCATION
-            ),
-            permissionId
-        )
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // request permission
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQ_CODE
+            );
+            return
+        }
+
+        fusedLocationClient.lastLocation
+            .addOnSuccessListener { location ->
+                // getting the last known or current location
+                latitude = location.latitude
+                longitude = location.longitude
+                binding.tvLatitude.text = "Latitude: ${location.latitude}"
+                binding.tvLongitude.text = "Longitude: ${location.longitude}"
+                binding.tvProvider.text = "Provider: ${location.provider}"
+                binding.btOpenMap.visibility = View.VISIBLE
+            }
+            .addOnFailureListener {
+                Toast.makeText(this, "Failed on getting current location",
+                    Toast.LENGTH_SHORT).show()
+            }
     }
-    @SuppressLint("MissingSuperCall")
+
     override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
+        requestCode: Int, permissions: Array<out String>, grantResults: IntArray
     ) {
-        if (requestCode == permissionId) {
-            if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                getLocation()
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            LOCATION_PERMISSION_REQ_CODE -> {
+                if (grantResults.isNotEmpty() &&
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission granted
+                } else {
+                    // permission denied
+                    Toast.makeText(this, "You need to grant permission to access location",
+                        Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
 
-    @SuppressLint("MissingPermission", "SetTextI18n")
-    private fun getLocation() {
-        if (checkPermissions()) {
-            if (isLocationEnabled()) {
-                mFusedLocationClient.lastLocation.addOnCompleteListener(this) { task ->
-                    val location: Location? = task.result
-                    if (location != null) {
-                        val geocoder = Geocoder(this, Locale.getDefault())
-                        val list: List<Address> =
-                            geocoder.getFromLocation(location.latitude, location.longitude, 1)!!
-                        binding.apply {
-                            tvLatitude.text = "Latitude\n${list[0].latitude}"
-                            tvLongitude.text = "Longitude\n${list[0].longitude}"
-                            tvCountryName.text = "Country Name\n${list[0].countryName}"
-                            tvLocality.text = "Locality\n${list[0].locality}"
-                            tvAddress.text = "Address\n${list[0].getAddressLine(0)}"
-                        }
-                    }
-                }
-            } else {
-                Toast.makeText(this, "Please turn on location", Toast.LENGTH_LONG).show()
-                val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-                startActivity(intent)
-            }
-        } else {
-            requestPermissions()
-        }
+    private fun openMap() {
+        val uri = Uri.parse("geo:${latitude},${longitude}")
+        val mapIntent = Intent(Intent.ACTION_VIEW, uri)
+        mapIntent.setPackage("com.google.android.apps.maps")
+        startActivity(mapIntent)
     }
+
 }

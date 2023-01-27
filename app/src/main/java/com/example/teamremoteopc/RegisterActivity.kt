@@ -124,7 +124,7 @@ class RegisterActivity : AppCompatActivity() {
                     .get(Calendar.YEAR)
                 val age = currentYear - cYear
                 binding.tvDob.visibility = View.VISIBLE
-                binding.tvDob.text = "Your Age is $age year"
+                binding.tvDob.text = "$age year"
                 textMessage( "Your Age is $age year")
             }
             binding.btnDob.text = "$cDay/{$cMonth+1}/$cYear"
